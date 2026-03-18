@@ -13,7 +13,12 @@ FEAT_PATH  = os.path.join(BASE_DIR, 'models', 'diabetes_features.pkl')
 model        = joblib.load(MODEL_PATH)
 feature_cols = joblib.load(FEAT_PATH)
 
-print("✅ Diabetes AI model loaded successfully!")
+# Avoid Windows multiprocessing permission issues during prediction.
+for estimator in getattr(model, 'estimators_', []):
+    if hasattr(estimator, 'n_jobs'):
+        estimator.n_jobs = 1
+
+print("Diabetes AI model loaded successfully!")
 
 # ══════════════════════════════════════════════════════════════
 # HELPER — ADD ENGINEERED FEATURES
@@ -90,7 +95,7 @@ def get_health_tips(result, risk_percent, bmi, glucose, age):
         if age > 45:
             tips.append("Age is a risk factor. Regular blood sugar monitoring is advised after 45.")
 
-    tips.append("⚠️ This is an AI prediction only. Always consult a qualified doctor for medical advice.")
+    tips.append("This is an AI prediction only. Always consult a qualified doctor for medical advice.")
 
     return tips
 
